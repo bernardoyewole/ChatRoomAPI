@@ -1,4 +1,11 @@
 
+using Entities.Context;
+using Entities.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.OpenApi;
+
 namespace ChatRoom
 {
     public class Program
@@ -14,7 +21,15 @@ namespace ChatRoom
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddDbContext<ChatRoomContext>(
+                options => options.UseSqlServer(@"Server=(LocalDb)\MSSQLLocalDB;Database=ChatRoomDb;Trusted_Connection=True;TrustServerCertificate=True;"));
+            builder.Services.AddAuthorization();
+            builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
+                .AddEntityFrameworkStores<ChatRoomContext>();
+
             var app = builder.Build();
+
+            app.MapIdentityApi<ApplicationUser>();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -22,6 +37,19 @@ namespace ChatRoom
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.MapPost("/logout", async (SignInManager<ApplicationUser> signInManager,
+                [FromBody] object empty) =>
+                        {
+                            if (empty != null)
+                            {
+                                await signInManager.SignOutAsync();
+                                return Results.Ok();
+                            }
+                            return Results.Unauthorized();
+                        })
+            .WithOpenApi()
+            .RequireAuthorization();
 
             app.UseHttpsRedirection();
 

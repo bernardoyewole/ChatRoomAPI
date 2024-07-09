@@ -28,7 +28,11 @@ namespace Entities.Context
 
     public class ChatRoomContext : IdentityDbContext<ApplicationUser>, IChatRoomContext
     {
-       public ChatRoomContext() : base() { }
+        public ChatRoomContext(DbContextOptions<ChatRoomContext> options) : base(options) { }
+
+        public ChatRoomContext() : base()
+        {
+        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

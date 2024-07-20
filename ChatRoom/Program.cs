@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.OpenApi;
+using DAL;
 
 namespace ChatRoom
 {
@@ -26,6 +27,11 @@ namespace ChatRoom
             builder.Services.AddAuthorization();
             builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
                 .AddEntityFrameworkStores<ChatRoomContext>();
+
+            builder.Services.AddScoped<IChatRoomContext, ChatRoomContext>();
+            builder.Services.AddScoped<IGenericRepository<ApplicationUser>, GenericRepository<ApplicationUser>>();
+
+            builder.Services.AddCors();
 
             var app = builder.Build();
 
@@ -50,6 +56,10 @@ namespace ChatRoom
                         })
             .WithOpenApi()
             .RequireAuthorization();
+
+            app.UseCors(
+                options => options.WithOrigins("http://localhost:3000").AllowAnyMethod()
+             );
 
             app.UseHttpsRedirection();
 

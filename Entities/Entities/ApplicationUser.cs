@@ -9,13 +9,13 @@ namespace Entities.Entities
 {
     public class ApplicationUser : IdentityUser
     {
-        public string FirstName { get; set; }
+        public string? FirstName { get; set; }
 
-        public string LastName { get; set; }
+        public string? LastName { get; set; }
 
-        public string DisplayName { get; set; }
+        public string? DisplayName { get; set; }
 
-        public string ProfilePictureUrl { get; set; }
+        public string? ProfilePictureUrl { get; set; }
 
         // Navigation property for the many-to-many relationship
         public ICollection<ChannelUser> ChannelUsers { get; set; }

@@ -2,9 +2,11 @@
 using Entities.Context;
 using Entities.Entities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.OpenApi;
+using ChatRoom.Services;
 using DAL;
 
 namespace ChatRoom
@@ -14,11 +16,10 @@ namespace ChatRoom
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            //var connectionString = builder.Configuration.GetConnectionString("ChatRoomContextConnection") ?? throw new InvalidOperationException("Connection string 'ChatRoomContextConnection' not found.");
 
             // Add services to the container.
-
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
@@ -31,7 +32,26 @@ namespace ChatRoom
             builder.Services.AddScoped<IChatRoomContext, ChatRoomContext>();
             builder.Services.AddScoped<IGenericRepository<ApplicationUser>, GenericRepository<ApplicationUser>>();
 
-            builder.Services.AddCors();
+            builder.Services.Configure<IdentityOptions>(options =>
+            {
+                options.SignIn.RequireConfirmedEmail = true;
+            });
+
+            // Add and configure CORS policy
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowLocalhost3000", builder =>
+                {
+                    builder.WithOrigins("http://localhost:3000")
+                           .AllowAnyMethod()
+                           .AllowAnyHeader()
+                           .AllowCredentials();
+                });
+            });
+
+            // Add email sender
+            builder.Services.AddTransient<IEmailSender, EmailSender>();
+            builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
 
             var app = builder.Build();
 
@@ -57,9 +77,8 @@ namespace ChatRoom
             .WithOpenApi()
             .RequireAuthorization();
 
-            app.UseCors(
-                options => options.WithOrigins("http://localhost:3000").AllowAnyMethod()
-             );
+            // Apply CORS policy
+            app.UseCors("AllowLocalhost3000");
 
             app.UseHttpsRedirection();
 

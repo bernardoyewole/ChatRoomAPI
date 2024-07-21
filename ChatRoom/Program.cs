@@ -16,7 +16,6 @@ namespace ChatRoom
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            //var connectionString = builder.Configuration.GetConnectionString("ChatRoomContextConnection") ?? throw new InvalidOperationException("Connection string 'ChatRoomContextConnection' not found.");
 
             // Add services to the container.
             builder.Services.AddControllers();
@@ -83,7 +82,6 @@ namespace ChatRoom
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 

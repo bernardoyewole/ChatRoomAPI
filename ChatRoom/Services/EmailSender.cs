@@ -32,7 +32,7 @@ public class EmailSender : IEmailSender
         var client = new SendGridClient(apiKey);
         var msg = new SendGridMessage()
         {
-            From = new EmailAddress("oyebenard@gmail.com", "Password Recovery"),
+            From = new EmailAddress("oyebenard@gmail.com", "Account Confirmation"),
             Subject = subject,
             PlainTextContent = message,
             HtmlContent = message
@@ -40,7 +40,6 @@ public class EmailSender : IEmailSender
         msg.AddTo(new EmailAddress(toEmail));
 
         // Disable click tracking.
-        // See https://sendgrid.com/docs/User_Guide/Settings/tracking.html
         msg.SetClickTracking(false, false);
         var response = await client.SendEmailAsync(msg);
         _logger.LogInformation(response.IsSuccessStatusCode

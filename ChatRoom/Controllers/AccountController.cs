@@ -1,7 +1,10 @@
 ﻿using Entities.Entities;
+using Entities.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 using System.Threading.Tasks;
 
 [Route("api/[controller]")]
@@ -77,5 +80,62 @@ public class AccountController : ControllerBase
         }
 
         return BadRequest("Error confirming email.");
+    }
+
+    [HttpPost("forgotPassword")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordModel model)
+    {
+        if (ModelState.IsValid)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+            {
+                return BadRequest("Invalid request.");
+            }
+
+            var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+            //var callbackUrl = Url.Action(
+            //    nameof(ResetPassword),
+            //    "Account",
+            //    new { email = model.Email, code },
+            //    protocol: HttpContext.Request.Scheme);
+
+            var callbackUrl = $"http://localhost:3000/resetPassword?email={model.Email}&code={code}";
+
+            await _emailSender.SendEmailAsync(model.Email, "Reset Password",
+                $"Please reset your password by <a href='{callbackUrl}'>clicking here</a>.");
+
+            return Ok("Password reset link has been sent to your email.");
+        }
+
+        return BadRequest(ModelState);
+    }
+
+    [HttpPost("resetPassword")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordModel model)
+    {
+        if (ModelState.IsValid)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                return BadRequest("There's no account associated with this email");
+            }
+
+            //var decodedCode = WebUtility.UrlDecode(model.ResetCode); // URL decode the token
+
+            var result = await _userManager.ResetPasswordAsync(user, model.ResetCode, model.NewPassword);
+            if (result.Succeeded)
+            {
+                return Ok("Password has been reset.");
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+        }
+
+        return BadRequest(ModelState);
     }
 }

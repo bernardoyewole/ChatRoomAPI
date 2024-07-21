@@ -5,22 +5,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Entities.Entities
+namespace Entities.Models
 {
-    public class RegisterModel
+    public class ResetPasswordModel
     {
         [Required]
         [EmailAddress]
         public string Email { get; set; }
 
         [Required]
+        public string ResetCode { get; set; }
+
+        [Required]
         [StringLength(100, MinimumLength = 6)]
-        public string Password { get; set; }
-
-        [Required]
-        public string FirstName { get; set; }
-
-        [Required]
-        public string LastName { get; set; }
+        public string NewPassword { get; set; }
     }
 }

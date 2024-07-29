@@ -22,5 +22,21 @@ namespace ChatRoom.Controllers
 
             return Ok(users);
         }
+
+        [HttpGet]
+        [Route("{email}")]
+        public async Task<IActionResult> GetUserById(string email)
+        {
+            var users = await _genericUserRepository.GetAll();
+
+            var user = users.Where(x =>  x.Email == email).FirstOrDefault();
+
+            if (user == null) {
+
+                return NotFound();
+            }
+
+            return Ok(user);
+        }
     }
 }

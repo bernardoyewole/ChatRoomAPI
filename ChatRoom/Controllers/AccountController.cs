@@ -12,12 +12,14 @@ using System.Threading.Tasks;
 public class AccountController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IEmailSender _emailSender;
 
-    public AccountController(UserManager<ApplicationUser> userManager, IEmailSender emailSender)
+    public AccountController(UserManager<ApplicationUser> userManager,  IEmailSender emailSender, SignInManager<ApplicationUser> signInManager)
     {
         _userManager = userManager;
         _emailSender = emailSender;
+        _signInManager = signInManager;
     }
 
     [HttpPost("register")]
@@ -46,18 +48,21 @@ public class AccountController : ControllerBase
 
                 // Send confirmation email
                 await _emailSender.SendEmailAsync(model.Email, "Confirm your email",
-                    $"Please confirm your account by <a href='{callbackUrl}'>clicking here</a>.");
-                        
+                $"Please confirm your account by <a href='{callbackUrl}'>clicking here</a>.");
+
+                Response.Headers.Append("IsFirstTimeUser", "true");
+
                 return Ok(new { message = "User registered successfully" });
             }
 
             foreach (var error in result.Errors)
             {
-                ModelState.AddModelError(string.Empty, error.Description);
+                ModelState.AddModelError(error.Code, error.Description);
             }
         }
         return BadRequest(ModelState);
     }
+
 
     [HttpGet("confirmEmail")]
     public async Task<IActionResult> ConfirmEmail(string userId, string code)
@@ -137,5 +142,35 @@ public class AccountController : ControllerBase
         }
 
         return BadRequest(ModelState);
+    }
+
+    [HttpPost("updateProfile")]
+    public async Task<IActionResult> UpdateProfile([FromForm] UpdateProfileModel model)
+    {
+        var user = await _userManager.FindByEmailAsync(model.Email);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        if (model.Picture != null)
+        {
+            using var memoryStream = new MemoryStream();
+            await model.Picture.CopyToAsync(memoryStream);
+            user.Picture = memoryStream.ToArray();
+        }
+
+        user.DisplayName = model.DisplayName;
+        user.Status = model.Status;
+        user.About = model.About;
+        user.IsFirstTimeUser = false;
+
+        var result = await _userManager.UpdateAsync(user);
+        if (result.Succeeded)
+        {
+            return Ok("Profile updated successfully");
+        }
+
+        return BadRequest(result.Errors);
     }
 }

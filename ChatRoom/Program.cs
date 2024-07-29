@@ -44,7 +44,8 @@ namespace ChatRoom
                     builder.WithOrigins("http://localhost:3000")
                            .AllowAnyMethod()
                            .AllowAnyHeader()
-                           .AllowCredentials();
+                           .AllowCredentials()
+                           .WithExposedHeaders("IsFirstTimeUser");
                 });
             });
 

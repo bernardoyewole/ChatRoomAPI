@@ -4,6 +4,7 @@ using Entities.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Entities.Migrations
 {
     [DbContext(typeof(ChatRoomContext))]
-    partial class ChatRoomContextModelSnapshot : ModelSnapshot
+    [Migration("20240726005024_ChatRoom5")]
+    partial class ChatRoom5
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -122,7 +125,7 @@ namespace Entities.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Channels", (string)null);
+                    b.ToTable("Channels");
                 });
 
             modelBuilder.Entity("Entities.Entities.ChannelUser", b =>
@@ -137,7 +140,7 @@ namespace Entities.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ChannelUsers", (string)null);
+                    b.ToTable("ChannelUsers");
                 });
 
             modelBuilder.Entity("Entities.Entities.Message", b =>
@@ -173,7 +176,7 @@ namespace Entities.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Messages", (string)null);
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("Entities.Entities.PrivateChat", b =>
@@ -198,7 +201,7 @@ namespace Entities.Migrations
 
                     b.HasIndex("User2Id");
 
-                    b.ToTable("PrivateChats", (string)null);
+                    b.ToTable("PrivateChats");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
